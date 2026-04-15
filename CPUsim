@@ -1,0 +1,125 @@
+#include <iostream>
+#include <queue>
+#include <stack>
+#include <algorithm>
+using namespace std;
+
+struct Process {
+    string name;
+    int burst;
+    int remaining;
+};
+
+
+void inputProcesses(queue<Process>& q) {
+    int n;
+
+    cout << "Enter number of processes: ";
+    cin >> n;
+
+    for(int i = 0; i < n; i++) {
+        Process p;
+
+        cout << "Enter name of process " << i+1 << ": ";
+        cin >> p.name;
+
+        cout << "Enter burst time: ";
+        cin >> p.burst;
+
+        p.remaining = p.burst;
+
+        q.push(p);
+    }
+}
+
+
+void runFCFS(queue<Process> q, stack<Process>& completed) {
+
+    while(!q.empty()) {
+
+        Process current = q.front();
+        q.pop();
+
+        cout << "Running: " << current.name << endl;
+
+        while(current.remaining > 0) {
+            current.remaining--;
+
+            cout << "Remaining of " << current.name
+                 << ": " << current.remaining << endl;
+        }
+
+        cout << current.name << " completed!\n";
+
+        completed.push(current);
+    }
+}
+
+
+void runRR(queue<Process> q, stack<Process>& completed, int quantum) {
+
+    while(!q.empty()) {
+
+        Process current = q.front();
+        q.pop();
+
+        cout << "Running: " << current.name << endl;
+
+        int run_time = min(current.remaining, quantum);
+
+        for(int i = 0; i < run_time; i++) {
+            current.remaining--;
+
+            cout << "Remaining of " << current.name
+                 << ": " << current.remaining << endl;
+        }
+
+        if(current.remaining > 0) {
+            q.push(current);
+        } else {
+            cout << current.name << " completed!\n";
+            completed.push(current);
+        }
+    }
+}
+
+
+void printCompleted(stack<Process> completed)
+{
+    cout << "\nCompleted Processes (Last Finished First):\n";
+
+    while (!completed.empty())
+    {
+        Process p = completed.top();
+        cout << p.name << endl;
+        completed.pop();
+    }
+}
+
+
+int main() {
+    queue<Process> q;
+    stack<Process> completed;
+
+    inputProcesses(q);
+
+    int choice, quantum;
+
+    cout << "Choose Algorithm:\n1. FCFS\n2. Round Robin\n";
+    cin >> choice;
+
+    if(choice == 2) {
+        cout << "Enter quantum: ";
+        cin >> quantum;
+    }
+
+    if(choice == 1) {
+        runFCFS(q, completed);
+    } else {
+        runRR(q, completed, quantum);
+    }
+
+    printCompleted(completed);
+
+    return 0;
+}
